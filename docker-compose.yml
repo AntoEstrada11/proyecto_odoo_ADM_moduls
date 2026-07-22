@@ -1,0 +1,35 @@
+@"
+version: '1.0'
+
+services:
+  web:
+    image: odoo:17.0
+    container_name: proyecto_odoo_ADM_moduls
+    depends_on:
+      - db
+    ports:
+      - "8070:8070"
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - .:/mnt/extra-addons
+    environment:
+      - HOST=
+      - USER=
+      - PASSWORD=
+
+  db:
+    image: postgres:15
+    container_name: proyecto_odoo_ADM_moduls
+    environment:
+      - POSTGRES_DB=
+      - POSTGRES_USER=
+      - POSTGRES_PASSWORD=
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+
+volumes:
+  odoo-web-data:
+    name: proyecto_odoo_ADM_moduls
+  odoo-db-data:
+    name: proyecto_odoo_ADM_moduls
+"@ | Out-File -Encoding utf8 docker-compose.yml
