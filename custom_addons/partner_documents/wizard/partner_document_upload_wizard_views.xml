@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_document_upload_wizard_form" model="ir.ui.view">
+        <field name="name">partner.document.upload.wizard.form</field>
+        <field name="model">partner.document.upload.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Subir documento">
+                <group>
+                    <group>
+                        <field name="partner_id" readonly="1"/>
+                        <field name="rating_company_type" invisible="1"/>
+                        <field name="is_custom_document" invisible="1"/>
+                        <field
+                            name="document_type_id"
+                            domain="['|', ('person_type', '=', 'both'), ('person_type', '=', rating_company_type)]"
+                            options="{'no_create': True, 'no_open': True}"
+                            context="{'default_person_type': rating_company_type}"
+                            placeholder="Elija de la lista o deje vacío / Otro"
+                        />
+                        <field
+                            name="document_name"
+                            placeholder="Ej. Contrato firmado, Garantía, Factura, etc."
+                        />
+                        <field name="file_name" invisible="1"/>
+                        <field name="file" filename="file_name" widget="binary"/>
+                    </group>
+                    <group>
+                        <field name="instructions" readonly="1" invisible="not document_type_id"/>
+                        <div class="text-muted" invisible="not is_custom_document">
+                            Escriba el nombre del documento si no está en la lista
+                            (use el tipo «Otro» o deje el tipo vacío).
+                        </div>
+                    </group>
+                </group>
+                <group string="Datos a capturar del contacto" invisible="not document_type_id">
+                    <group>
+                        <field name="show_vat" invisible="1"/>
+                        <field name="show_legal_representative" invisible="1"/>
+                        <field name="show_legal_representative_id" invisible="1"/>
+                        <field name="show_official_id" invisible="1"/>
+                        <field name="show_curp" invisible="1"/>
+                        <field name="show_opening_date" invisible="1"/>
+                        <field name="show_social_capital" invisible="1"/>
+                        <field name="show_corporate_structure" invisible="1"/>
+                        <field name="show_bank_name" invisible="1"/>
+                        <field name="show_bank_account" invisible="1"/>
+                        <field name="show_imss_number" invisible="1"/>
+                        <field name="show_infonavit_number" invisible="1"/>
+                        <field name="show_contractual_object" invisible="1"/>
+
+                        <field name="vat" invisible="not show_vat" required="show_vat"/>
+                        <field name="legal_representative" invisible="not show_legal_representative" required="show_legal_representative"/>
+                        <field name="legal_representative_id" invisible="not show_legal_representative_id" required="show_legal_representative_id"/>
+                        <field name="official_id" invisible="not show_official_id" required="show_official_id"/>
+                        <field name="curp" invisible="not show_curp" required="show_curp"/>
+                        <field name="opening_date" invisible="not show_opening_date" required="show_opening_date"/>
+                        <field name="social_capital" invisible="not show_social_capital"/>
+                        <field name="bank_name" invisible="not show_bank_name" required="show_bank_name"/>
+                        <field name="bank_account" invisible="not show_bank_account" required="show_bank_account"/>
+                        <field name="imss_number" invisible="not show_imss_number"/>
+                        <field name="infonavit_number" invisible="not show_infonavit_number"/>
+                    </group>
+                    <group>
+                        <field name="corporate_structure" invisible="not show_corporate_structure"/>
+                        <field name="contractual_object" invisible="not show_contractual_object"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Guardar documento" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_partner_document_upload_wizard" model="ir.actions.act_window">
+        <field name="name">Subir documento</field>
+        <field name="res_model">partner.document.upload.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_rating_list" model="ir.ui.view">
+        <field name="name">res.partner.form.rating.list</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="partner_documents.view_partner_form_documents"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='supplier_qualification']" position="inside">
+                <group string="Evaluaciones">
+                    <field name="rating_ids" nolabel="1">
+                        <tree>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="analysis_status"/>
+                            <field name="score_percent"/>
+                            <field name="rating_level"/>
+                            <field name="state"/>
+                        </tree>
+                    </field>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_rating_tree" model="ir.ui.view">
+        <field name="name">partner.rating.tree</field>
+        <field name="model">partner.rating</field>
+        <field name="arch" type="xml">
+            <tree string="Evaluaciones de proveedores">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="company_type"/>
+                <field name="date"/>
+                <field name="analysis_status"/>
+                <field name="score_percent" widget="progressbar"/>
+                <field name="rating_level"/>
+                <field name="risk_level"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_partner_rating_form" model="ir.ui.view">
+        <field name="name">partner.rating.form</field>
+        <field name="model">partner.rating</field>
+        <field name="arch" type="xml">
+            <form string="Gestión de Proveedores - Evaluación">
+                <header>
+                    <button
+                        name="action_open_partner"
+                        type="object"
+                        string="Editar datos / documentos del contacto"
+                        class="btn-secondary"
+                    />
+                    <button
+                        name="action_load_checklist"
+                        type="object"
+                        string="Cargar checklist"
+                        invisible="document_line_ids"
+                        class="btn-secondary"
+                    />
+                    <button
+                        name="action_reload_checklist"
+                        type="object"
+                        string="Regenerar checklist"
+                        invisible="not document_line_ids or state == 'done'"
+                        class="btn-secondary"
+                        confirm="Se borrará el checklist actual y se creará de nuevo según Moral/Física. ¿Continuar?"
+                    />
+                    <button
+                        name="action_set_done"
+                        type="object"
+                        string="Finalizar"
+                        invisible="state == 'done'"
+                        class="btn-primary"
+                    />
+                    <button
+                        name="action_set_draft"
+                        type="object"
+                        string="Volver a borrador"
+                        invisible="state == 'draft'"
+                    />
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Referencia de evaluación"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="id"/>
+                            <field name="company_type"/>
+                            <field name="date"/>
+                            <div class="text-muted" colspan="2" invisible="not id">
+                                El proveedor queda fijo al crear la evaluación.
+                                Para evaluar a otro contacto, cree una evaluación nueva.
+                            </div>
+                        </group>
+                        <group>
+                            <field name="score_percent" widget="progressbar"/>
+                            <field name="score_obtained"/>
+                            <field name="score_max"/>
+                            <field name="rating_level"/>
+                            <field name="risk_level"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="1. Datos del contacto" name="qualification">
+                            <div class="alert alert-info" role="alert">
+                                Solo se muestran los datos aplicables al tipo de persona del contacto.
+                            </div>
+                            <group string="Identificación">
+                                <group>
+                                    <field name="company_name"/>
+                                    <field name="vat"/>
+                                    <field name="bank_name"/>
+                                    <field name="bank_account"/>
+                                </group>
+                            </group>
+
+                            <group string="Persona Física" invisible="company_type != 'fisica'">
+                                <group>
+                                    <field name="official_id"/>
+                                    <field name="curp"/>
+                                </group>
+                            </group>
+
+                            <group string="Persona Moral" invisible="company_type != 'moral'">
+                                <group>
+                                    <field name="legal_representative"/>
+                                    <field name="legal_representative_id"/>
+                                    <field name="opening_date"/>
+                                    <field name="social_capital"/>
+                                    <field name="imss_number"/>
+                                    <field name="infonavit_number"/>
+                                </group>
+                                <group>
+                                    <field name="contractual_object"/>
+                                    <field name="corporate_structure"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <page string="2. Criterios internos" name="criteria">
+                            <group>
+                                <field name="meets_internal_criteria" widget="radio"/>
+                                <field name="analysis_status" widget="radio"/>
+                                <field name="status_reason" placeholder="Razón de estatus..."/>
+                            </group>
+                        </page>
+
+                        <page string="3. Documentos evaluados" name="documents">
+                            <p class="text-muted">
+                                Checklist según tipo de persona (Moral/Física).
+                                Si el documento ya se subió en el contacto, aparece como Recibido.
+                            </p>
+                            <field name="document_line_ids" nolabel="1">
+                                <tree editable="bottom" create="0" delete="0">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="document_type_id" optional="hide"/>
+                                    <field name="name"/>
+                                    <field name="person_type"/>
+                                    <field name="situation"/>
+                                    <field name="partner_document_id"/>
+                                    <field name="warnings"/>
+                                </tree>
+                            </field>
+                            <group>
+                                <field name="documents_notes"/>
+                                <field name="post_hire_notes"/>
+                            </group>
+                        </page>
+
+                        <page string="Averiguaciones" name="research">
+                            <field name="research_line_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="situation"/>
+                                    <field name="warnings"/>
+                                    <field name="evidence_filename" column_invisible="1"/>
+                                    <field name="evidence" filename="evidence_filename" widget="binary"/>
+                                </tree>
+                            </field>
+                            <group>
+                                <field name="research_notes"/>
+                                <field name="risk_level"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_partner_rating" model="ir.actions.act_window">
+        <field name="name">Evaluaciones</field>
+        <field name="res_model">partner.rating</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_partner_rating_root"
+        name="Calificadora"
+        sequence="90"
+    />
+    <menuitem
+        id="menu_partner_rating"
+        name="Evaluaciones"
+        parent="menu_partner_rating_root"
+        action="action_partner_rating"
+        sequence="10"
+    />
+</odoo>

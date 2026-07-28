@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_partner_document_user,partner.document.user,model_partner_document,base.group_user,1,1,1,1
+access_partner_document_type_user,partner.document.type.user,model_partner_document_type,base.group_user,1,1,0,0
+access_partner_document_upload_wizard_user,partner.document.upload.wizard.user,model_partner_document_upload_wizard,base.group_user,1,1,1,1

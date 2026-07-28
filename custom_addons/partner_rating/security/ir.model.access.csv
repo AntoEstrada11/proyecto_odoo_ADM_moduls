@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_partner_rating_user,partner.rating.user,model_partner_rating,base.group_user,1,1,1,1
+access_partner_rating_document_line_user,partner.rating.document.line.user,model_partner_rating_document_line,base.group_user,1,1,1,1
+access_partner_rating_research_line_user,partner.rating.research.line.user,model_partner_rating_research_line,base.group_user,1,1,1,1

@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Partner Documents',
-    'version': '17.0.1.0.0',
+    'version': '17.0.3.2.0',
     'category': 'Sales/CRM',
-    'summary': 'Pestaña de documentos en contactos',
+    'summary': 'Documentos digitalizados de proveedores con captura de datos',
     'description': """
-Agrega la pestaña Documentos junto a Notas Internas en la ficha de contacto.
-Permite anexar PDF, imágenes y Excel con nombre y vista previa.
+Pestaña Documentos en contactos:
+- Tipos de documento por Persona Moral / Física
+- Wizard al subir que captura datos del contacto
+- Vista previa de archivos
 """,
     'depends': ['base', 'contacts'],
     'data': [
         'security/ir.model.access.csv',
+        'data/partner_document_type_data.xml',
+        'wizard/partner_document_upload_wizard_views.xml',
         'views/res_partner_views.xml',
     ],
     'installable': True,

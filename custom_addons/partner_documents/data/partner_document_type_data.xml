@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Documentos evaluados (formulario UNIVERSAL) + requisitos de expediente (IURD).
+        No se desactivan tipos: solo se añaden los que faltaban del PDF de políticas.
+    -->
+
+    <!-- AMBOS (evaluación + expediente) -->
+    <record id="doc_type_constancia_sat" model="partner.document.type">
+        <field name="name">Constancia de Situación Fiscal (SAT)</field>
+        <field name="code">constancia_sat</field>
+        <field name="sequence">10</field>
+        <field name="person_type">both</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">vat</field>
+        <field name="instructions">Capture el RFC de la Constancia de Situación Fiscal.</field>
+    </record>
+    <record id="doc_type_rfc" model="partner.document.type">
+        <field name="name">RFC</field>
+        <field name="code">rfc</field>
+        <field name="sequence">15</field>
+        <field name="person_type">both</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">vat</field>
+        <field name="instructions">Capture el RFC del proveedor (requisito de expediente IURD).</field>
+    </record>
+    <record id="doc_type_opinion_sat" model="partner.document.type">
+        <field name="name">Opinión de Cumplimiento de Obligaciones Fiscales (SAT - Artículo 32-D)</field>
+        <field name="code">opinion_sat</field>
+        <field name="sequence">40</field>
+        <field name="person_type">both</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">vat</field>
+        <field name="instructions">Confirme el RFC asociado a la opinión de cumplimiento.</field>
+    </record>
+    <record id="doc_type_opinion_imss" model="partner.document.type">
+        <field name="name">Opinión de Cumplimiento IMSS</field>
+        <field name="code">opinion_imss</field>
+        <field name="sequence">50</field>
+        <field name="person_type">both</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">imss_number</field>
+        <field name="instructions">Capture el registro patronal IMSS.</field>
+    </record>
+    <record id="doc_type_infonavit" model="partner.document.type">
+        <field name="name">Constancia de Cumplimiento INFONAVIT</field>
+        <field name="code">infonavit</field>
+        <field name="sequence">60</field>
+        <field name="person_type">both</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">infonavit_number</field>
+        <field name="instructions">Capture el número INFONAVIT.</field>
+    </record>
+    <record id="doc_type_domicilio" model="partner.document.type">
+        <field name="name">Comprobante de Domicilio Fiscal</field>
+        <field name="code">domicilio_fiscal</field>
+        <field name="sequence">70</field>
+        <field name="person_type">both</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields"/>
+        <field name="instructions">Verifique que el domicilio del contacto coincida con el comprobante.</field>
+    </record>
+    <record id="doc_type_banco" model="partner.document.type">
+        <field name="name">Carátula del Estado de Cuenta (CLABE y nombre del proveedor)</field>
+        <field name="code">cuenta_bancaria</field>
+        <field name="sequence">80</field>
+        <field name="person_type">both</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">bank_name,bank_account</field>
+        <field name="instructions">Capture banco y CLABE. Debe aparecer el nombre del proveedor.</field>
+    </record>
+    <record id="doc_type_cotizaciones" model="partner.document.type">
+        <field name="name">3 cotizaciones (a nombre de IURD)</field>
+        <field name="code">cotizaciones</field>
+        <field name="sequence">130</field>
+        <field name="person_type">both</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields"/>
+        <field name="instructions">Adjunte 3 cotizaciones dirigidas a Iglesia Universal / IURD (atención Lic. Olga Lidia Martínez Herrera y/o Pr. Murilo Lima).</field>
+    </record>
+
+    <!-- PERSONA MORAL -->
+    <record id="doc_type_acta" model="partner.document.type">
+        <field name="name">Acta Constitutiva</field>
+        <field name="code">acta_constitutiva</field>
+        <field name="sequence">20</field>
+        <field name="person_type">moral</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">opening_date,social_capital,corporate_structure,legal_representative,contractual_object</field>
+        <field name="instructions">Capture fecha de constitución, capital, estructura, representante y objeto social.</field>
+    </record>
+    <record id="doc_type_protocolos" model="partner.document.type">
+        <field name="name">Protocolos de Modificaciones al Acta Constitutiva</field>
+        <field name="code">protocolos_acta</field>
+        <field name="sequence">30</field>
+        <field name="person_type">moral</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">corporate_structure,legal_representative</field>
+        <field name="instructions">Actualice estructura corporativa y representante si aplica.</field>
+    </record>
+    <record id="doc_type_id_representante" model="partner.document.type">
+        <field name="name">Identificación Oficial Vigente del Representante Legal</field>
+        <field name="code">id_representante</field>
+        <field name="sequence">90</field>
+        <field name="person_type">moral</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">legal_representative,legal_representative_id</field>
+        <field name="instructions">Capture nombre e ID/folio de la identificación del representante legal.</field>
+    </record>
+    <record id="doc_type_poder" model="partner.document.type">
+        <field name="name">Poder del Representante Legal</field>
+        <field name="code">poder_notarial</field>
+        <field name="sequence">100</field>
+        <field name="person_type">moral</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">legal_representative,legal_representative_id</field>
+        <field name="instructions">Capture datos del apoderado según el poder notarial.</field>
+    </record>
+    <record id="doc_type_balance" model="partner.document.type">
+        <field name="name">Balance General</field>
+        <field name="code">balance_general</field>
+        <field name="sequence">110</field>
+        <field name="person_type">moral</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields"/>
+        <field name="instructions">Adjunte el balance general. No requiere captura adicional.</field>
+    </record>
+    <record id="doc_type_resultados" model="partner.document.type">
+        <field name="name">Estado de Resultados</field>
+        <field name="code">estado_resultados</field>
+        <field name="sequence">120</field>
+        <field name="person_type">moral</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields"/>
+        <field name="instructions">Adjunte el estado de resultados. No requiere captura adicional.</field>
+    </record>
+
+    <!-- PERSONA FÍSICA -->
+    <record id="doc_type_id_titular" model="partner.document.type">
+        <field name="name">Identificación Oficial Vigente del Titular</field>
+        <field name="code">id_titular</field>
+        <field name="sequence">90</field>
+        <field name="person_type">fisica</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields">official_id,curp</field>
+        <field name="instructions">Capture número de identificación oficial y CURP del titular.</field>
+    </record>
+
+    <!-- PERSONALIZADO -->
+    <record id="doc_type_otro" model="partner.document.type">
+        <field name="name">Otro (escribir nombre)</field>
+        <field name="code">otro</field>
+        <field name="sequence">200</field>
+        <field name="person_type">both</field>
+        <field name="active" eval="True"/>
+        <field name="capture_fields"/>
+        <field name="instructions">Escriba el nombre del documento en el campo Nombre del documento.</field>
+    </record>
+</odoo>
