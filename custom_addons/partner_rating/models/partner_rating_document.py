@@ -42,7 +42,17 @@ class PartnerRatingDocumentLine(models.Model):
         default='not_received',
         required=True,
     )
-    warnings = fields.Char(string='Advertencias')
+    warnings = fields.Selection(
+        [
+            ('none', 'Sin advertencias'),
+            ('minor', 'Menor'),
+            ('major', 'Mayor'),
+            ('critical', 'Crítica'),
+        ],
+        string='Advertencias',
+        default='none',
+        required=True,
+    )
     partner_document_id = fields.Many2one(
         'partner.document',
         string='Archivo digitalizado',

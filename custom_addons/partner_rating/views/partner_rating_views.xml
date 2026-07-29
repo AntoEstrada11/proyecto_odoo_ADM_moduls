@@ -6,17 +6,43 @@
         <field name="inherit_id" ref="partner_documents.view_partner_form_documents"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='supplier_qualification']" position="inside">
-                <group string="Evaluaciones">
-                    <field name="rating_ids" nolabel="1">
-                        <tree>
-                            <field name="name"/>
-                            <field name="date"/>
-                            <field name="analysis_status"/>
-                            <field name="score_percent"/>
-                            <field name="rating_level"/>
-                            <field name="state"/>
-                        </tree>
-                    </field>
+                <separator string="Resumen de evaluación"/>
+                <div invisible="has_rating" class="text-muted mb-2">
+                    Este contacto aún no tiene evaluación en Calificadora.
+                </div>
+                <group invisible="not has_rating">
+                    <group string="Estatus">
+                        <field name="has_rating" invisible="1"/>
+                        <field name="rating_id" invisible="1"/>
+                        <field name="rating_summary_date"/>
+                        <field name="rating_summary_state"/>
+                        <field name="rating_summary_level"/>
+                        <field name="rating_summary_risk"/>
+                        <field name="rating_summary_analysis"/>
+                    </group>
+                    <group string="Porcentajes">
+                        <field name="rating_viability_percent" widget="progressbar"/>
+                        <field name="rating_performance_percent" widget="progressbar"/>
+                        <field name="rating_global_percent" widget="progressbar"/>
+                    </group>
+                </group>
+                <group>
+                    <div>
+                        <button
+                            name="action_open_partner_rating"
+                            type="object"
+                            class="btn-primary"
+                            string="Abrir evaluación"
+                            invisible="not has_rating"
+                        />
+                        <button
+                            name="action_open_partner_rating"
+                            type="object"
+                            class="btn-secondary"
+                            string="Crear evaluación"
+                            invisible="has_rating"
+                        />
+                    </div>
                 </group>
             </xpath>
         </field>
@@ -32,6 +58,8 @@
                 <field name="company_type"/>
                 <field name="date"/>
                 <field name="analysis_status"/>
+                <field name="viability_percent" widget="progressbar"/>
+                <field name="performance_percent" widget="progressbar"/>
                 <field name="score_percent" widget="progressbar"/>
                 <field name="rating_level"/>
                 <field name="risk_level"/>
@@ -56,16 +84,15 @@
                         name="action_load_checklist"
                         type="object"
                         string="Cargar checklist"
-                        invisible="document_line_ids"
                         class="btn-secondary"
                     />
                     <button
                         name="action_reload_checklist"
                         type="object"
-                        string="Regenerar checklist"
+                        string="Regenerar checklist documental"
                         invisible="not document_line_ids or state == 'done'"
                         class="btn-secondary"
-                        confirm="Se borrará el checklist actual y se creará de nuevo según Moral/Física. ¿Continuar?"
+                        confirm="Se borrará el checklist documental actual y se creará de nuevo según Moral/Física. ¿Continuar?"
                     />
                     <button
                         name="action_set_done"
@@ -83,27 +110,39 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            name="action_open_score_help"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-percent"
+                        >
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Cómo se</span>
+                                <span class="o_stat_text">calcula el %</span>
+                            </div>
+                        </button>
+                    </div>
                     <div class="oe_title">
+                        <label for="name" string="Evaluación"/>
                         <h1>
                             <field name="name" placeholder="Referencia de evaluación"/>
                         </h1>
                     </div>
                     <group>
-                        <group>
+                        <group string="Proveedor">
                             <field name="partner_id" readonly="id"/>
                             <field name="company_type"/>
                             <field name="date"/>
-                            <div class="text-muted" colspan="2" invisible="not id">
-                                El proveedor queda fijo al crear la evaluación.
-                                Para evaluar a otro contacto, cree una evaluación nueva.
-                            </div>
-                        </group>
-                        <group>
-                            <field name="score_percent" widget="progressbar"/>
-                            <field name="score_obtained"/>
-                            <field name="score_max"/>
                             <field name="rating_level"/>
                             <field name="risk_level"/>
+                        </group>
+                        <group string="Calificaciones">
+                            <field name="viability_percent" widget="progressbar"/>
+                            <field name="performance_percent" widget="progressbar"/>
+                            <field name="score_percent" widget="progressbar"/>
+                            <field name="weight_viability" invisible="1"/>
+                            <field name="weight_performance" invisible="1"/>
                         </group>
                     </group>
 
@@ -154,8 +193,8 @@
 
                         <page string="3. Documentos evaluados" name="documents">
                             <p class="text-muted">
-                                Checklist según tipo de persona (Moral/Física).
-                                Si el documento ya se subió en el contacto, aparece como Recibido.
+                                Parte de la viabilidad documental.
+                                Puntaje: No recibido 0 · Recibido 1 · Aprobado 2.
                             </p>
                             <field name="document_line_ids" nolabel="1">
                                 <tree editable="bottom" create="0" delete="0">
@@ -174,20 +213,43 @@
                             </group>
                         </page>
 
-                        <page string="Averiguaciones" name="research">
+                        <page string="4. Averiguaciones" name="research">
+                            <p class="text-muted">
+                                Parte de la viabilidad documental.
+                                Puntaje: Pendiente 0 · Realizada 1 · Favorable 2 · Con hallazgos 0.
+                            </p>
                             <field name="research_line_ids" nolabel="1">
                                 <tree editable="bottom">
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
                                     <field name="situation"/>
                                     <field name="warnings"/>
+                                    <field name="notes" optional="show"/>
                                     <field name="evidence_filename" column_invisible="1"/>
                                     <field name="evidence" filename="evidence_filename" widget="binary"/>
                                 </tree>
                             </field>
                             <group>
                                 <field name="research_notes"/>
-                                <field name="risk_level"/>
+                            </group>
+                        </page>
+
+                        <page string="5. Desempeño comercial" name="performance">
+                            <p class="text-muted">
+                                Precio, calidad, entrega, servicio y cumplimiento.
+                                Escala: Sin calificar 0 · Malo 1 · Regular 2 · Bueno 3 · Muy bueno 4 · Excelente 5.
+                            </p>
+                            <field name="performance_line_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="score"/>
+                                    <field name="warnings"/>
+                                    <field name="notes"/>
+                                </tree>
+                            </field>
+                            <group>
+                                <field name="performance_notes"/>
                             </group>
                         </page>
                     </notebook>

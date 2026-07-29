@@ -119,3 +119,7 @@ class PartnerDocument(models.Model):
         if file_name and 'mimetype' not in vals:
             vals['mimetype'] = self._guess_mimetype(file_name)
         return super().write(vals)
+
+    def action_delete_document(self):
+        self.unlink()
+        return True

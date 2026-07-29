@@ -16,7 +16,31 @@ class PartnerRatingResearchLine(models.Model):
     )
     sequence = fields.Integer(string='#', default=10)
     name = fields.Char(string='Pesquisa', required=True)
-    situation = fields.Text(string='Situación')
-    warnings = fields.Char(string='Advertencias')
+    situation = fields.Selection(
+        [
+            ('pending', 'Pendiente'),
+            ('done', 'Realizada'),
+            ('approved', 'Favorable'),
+            ('unfavorable', 'Con hallazgos'),
+        ],
+        string='Situación',
+        default='pending',
+        required=True,
+    )
+    warnings = fields.Selection(
+        [
+            ('none', 'Sin advertencias'),
+            ('minor', 'Menor'),
+            ('major', 'Mayor'),
+            ('critical', 'Crítica'),
+        ],
+        string='Advertencias',
+        default='none',
+        required=True,
+    )
+    notes = fields.Char(
+        string='Detalle',
+        help='Comentario libre sobre la pesquisa o la advertencia.',
+    )
     evidence = fields.Binary(string='Evidencia', attachment=True)
     evidence_filename = fields.Char(string='Nombre evidencia')

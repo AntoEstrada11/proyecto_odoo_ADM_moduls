@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Calificadora de Proveedores',
-    'version': '17.0.5.1.0',
+    'version': '17.0.6.2.0',
     'category': 'Purchases',
     'summary': 'Evaluación de proveedores con checklist por tipo de persona',
     'description': """
@@ -13,6 +13,7 @@ Evalúa contactos/proveedores:
     'depends': ['base', 'contacts', 'partner_documents'],
     'data': [
         'security/ir.model.access.csv',
+        'wizard/partner_rating_score_help_wizard_views.xml',
         'views/partner_rating_views.xml',
     ],
     'installable': True,

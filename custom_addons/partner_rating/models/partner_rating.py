@@ -10,6 +10,14 @@ RESEARCH_TEMPLATES = [
     'Domicilio',
 ]
 
+PERFORMANCE_TEMPLATES = [
+    'Precio / competitividad',
+    'Calidad del producto o servicio',
+    'Tiempo de entrega',
+    'Atención y comunicación',
+    'Cumplimiento contractual',
+]
+
 
 class PartnerRating(models.Model):
     _name = 'partner.rating'
@@ -133,10 +141,41 @@ class PartnerRating(models.Model):
         string='Riesgo',
     )
 
+    performance_line_ids = fields.One2many(
+        'partner.rating.performance.line',
+        'rating_id',
+        string='Desempeño comercial',
+    )
+    performance_notes = fields.Text(string='Notas de desempeño')
+    weight_viability = fields.Float(
+        string='Peso viabilidad %',
+        default=60.0,
+        help='Peso del bloque documental/averiguaciones en el global.',
+    )
+    weight_performance = fields.Float(
+        string='Peso desempeño %',
+        default=40.0,
+        help='Peso del bloque comercial en el global.',
+    )
+
+    viability_score_obtained = fields.Float(compute='_compute_score', store=True)
+    viability_score_max = fields.Float(compute='_compute_score', store=True)
+    viability_percent = fields.Float(
+        string='% Viabilidad documental',
+        compute='_compute_score',
+        store=True,
+    )
+    performance_score_obtained = fields.Float(compute='_compute_score', store=True)
+    performance_score_max = fields.Float(compute='_compute_score', store=True)
+    performance_percent = fields.Float(
+        string='% Desempeño comercial',
+        compute='_compute_score',
+        store=True,
+    )
     score_obtained = fields.Float(compute='_compute_score', store=True)
     score_max = fields.Float(compute='_compute_score', store=True)
     score_percent = fields.Float(
-        string='Calificación %',
+        string='% Global ponderado',
         compute='_compute_score',
         store=True,
     )
@@ -152,42 +191,100 @@ class PartnerRating(models.Model):
         store=True,
     )
 
+    @api.constrains('weight_viability', 'weight_performance')
+    def _check_weights(self):
+        for rating in self:
+            total = (rating.weight_viability or 0.0) + (rating.weight_performance or 0.0)
+            if abs(total - 100.0) > 0.01:
+                raise UserError(_(
+                    'Los pesos de viabilidad y desempeño deben sumar 100%%. '
+                    'Actual: %.1f%%.'
+                ) % total)
+
     @api.depends(
         'document_line_ids.situation',
+        'research_line_ids.situation',
+        'performance_line_ids.score',
         'meets_internal_criteria',
         'analysis_status',
+        'weight_viability',
+        'weight_performance',
     )
     def _compute_score(self):
+        doc_score_map = {
+            'not_received': 0.0,
+            'received': 1.0,
+            'approved': 2.0,
+        }
+        research_score_map = {
+            'pending': 0.0,
+            'done': 1.0,
+            'approved': 2.0,
+            'unfavorable': 0.0,
+        }
         for rating in self:
-            lines = rating.document_line_ids
-            score_max = len(lines) * 2.0 if lines else 0.0
-            score_map = {
-                'not_received': 0.0,
-                'received': 1.0,
-                'approved': 2.0,
-            }
-            score_obtained = sum(
-                score_map.get(line.situation, 0.0) for line in lines
+            doc_lines = rating.document_line_ids
+            research_lines = rating.research_line_ids
+            perf_lines = rating.performance_line_ids
+
+            viability_max = (len(doc_lines) * 2.0) + (len(research_lines) * 2.0)
+            viability_obtained = sum(
+                doc_score_map.get(line.situation, 0.0) for line in doc_lines
+            )
+            viability_obtained += sum(
+                research_score_map.get(line.situation, 0.0)
+                for line in research_lines
             )
             if rating.meets_internal_criteria == 'yes':
-                score_obtained += 2.0
-                score_max += 2.0
+                viability_obtained += 2.0
+                viability_max += 2.0
             elif rating.meets_internal_criteria == 'no':
-                score_max += 2.0
+                viability_max += 2.0
 
-            percent = (score_obtained / score_max * 100.0) if score_max else 0.0
-            if rating.analysis_status == 'failed' or percent < 50:
+            viability_percent = (
+                (viability_obtained / viability_max * 100.0) if viability_max else 0.0
+            )
+
+            performance_max = len(perf_lines) * 5.0
+            performance_obtained = sum(float(line.score or 0) for line in perf_lines)
+            performance_percent = (
+                (performance_obtained / performance_max * 100.0)
+                if performance_max else 0.0
+            )
+
+            w_v = rating.weight_viability or 0.0
+            w_p = rating.weight_performance or 0.0
+            if abs(w_v + w_p - 100.0) > 0.01:
+                w_v, w_p = 60.0, 40.0
+
+            rated_perf = any((line.score or '0') != '0' for line in perf_lines)
+            if not perf_lines or not rated_perf:
+                # Sin desempeño calificado aún, el global = viabilidad
+                global_percent = viability_percent
+            else:
+                global_percent = (
+                    (viability_percent * w_v / 100.0)
+                    + (performance_percent * w_p / 100.0)
+                )
+
+            if rating.analysis_status == 'failed' or global_percent < 50:
                 level = 'failed'
-            elif rating.analysis_status == 'not_recommended' or percent < 70:
+            elif rating.analysis_status == 'not_recommended' or global_percent < 70:
                 level = 'not_recommended'
-            elif rating.analysis_status == 'approved_reserved' or percent < 90:
+            elif rating.analysis_status == 'approved_reserved' or global_percent < 90:
                 level = 'reserved'
             else:
                 level = 'approved'
 
-            rating.score_obtained = score_obtained
-            rating.score_max = score_max
-            rating.score_percent = percent
+            rating.viability_score_obtained = viability_obtained
+            rating.viability_score_max = viability_max
+            rating.viability_percent = viability_percent
+            rating.performance_score_obtained = performance_obtained
+            rating.performance_score_max = performance_max
+            rating.performance_percent = performance_percent
+            rating.score_obtained = viability_obtained + performance_obtained
+            rating.score_max = viability_max + performance_max
+            rating.score_percent = global_percent
             rating.rating_level = level
 
     @api.onchange('partner_id')
@@ -204,6 +301,19 @@ class PartnerRating(models.Model):
             'res_id': self.partner_id.id,
             'view_mode': 'form',
             'target': 'current',
+        }
+
+    def action_open_score_help(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Cómo se calcula el %',
+            'res_model': 'partner.rating.score.help.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_rating_id': self.id,
+            },
         }
 
     @api.model_create_multi
@@ -279,11 +389,18 @@ class PartnerRating(models.Model):
                 }
                 for index, name in enumerate(RESEARCH_TEMPLATES, start=1)
             ])
+        if not self.performance_line_ids:
+            self.env['partner.rating.performance.line'].create([
+                {
+                    'rating_id': self.id,
+                    'sequence': index,
+                    'name': name,
+                }
+                for index, name in enumerate(PERFORMANCE_TEMPLATES, start=1)
+            ])
 
     def action_load_checklist(self):
         for rating in self:
-            if rating.document_line_ids:
-                continue
             rating._generate_default_lines()
         return True
 
