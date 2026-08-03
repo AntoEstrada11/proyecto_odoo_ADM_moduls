@@ -26,7 +26,7 @@
                         <field name="rating_global_percent" widget="progressbar"/>
                     </group>
                 </group>
-                <group>
+                <group groups="partner_rating.group_evaluation_user">
                     <div>
                         <button
                             name="action_open_partner_rating"
@@ -193,7 +193,7 @@
 
                         <page string="3. Documentos evaluados" name="documents">
                             <p class="text-muted">
-                                Parte de la viabilidad documental.
+                                Parte de la viabilidad jurídica / documental.
                                 Puntaje: No recibido 0 · Recibido 1 · Aprobado 2.
                             </p>
                             <field name="document_line_ids" nolabel="1">
@@ -215,7 +215,8 @@
 
                         <page string="4. Averiguaciones" name="research">
                             <p class="text-muted">
-                                Parte de la viabilidad documental.
+                                Parte de la viabilidad jurídica / documental
+                                (investigaciones en portales: SAT, buró, domicilio, etc.).
                                 Puntaje: Pendiente 0 · Realizada 1 · Favorable 2 · Con hallazgos 0.
                             </p>
                             <field name="research_line_ids" nolabel="1">
@@ -235,21 +236,26 @@
                         </page>
 
                         <page string="5. Desempeño comercial" name="performance">
-                            <p class="text-muted">
-                                Precio, calidad, entrega, servicio y cumplimiento.
-                                Escala: Sin calificar 0 · Malo 1 · Regular 2 · Bueno 3 · Muy bueno 4 · Excelente 5.
-                            </p>
-                            <field name="performance_line_ids" nolabel="1">
-                                <tree editable="bottom">
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="name"/>
-                                    <field name="score"/>
-                                    <field name="warnings"/>
-                                    <field name="notes"/>
-                                </tree>
-                            </field>
+                            <div class="alert alert-info" role="alert">
+                                Este porcentaje ya no se captura aquí.
+                                Se calcula con el historial de compras finalizadas
+                                (Eval. Compras), calificando en cada compra:
+                                Precio, Calidad, Entrega, Atención y Cumplimiento.
+                                Las averiguaciones (SAT, buró, etc.) forman parte
+                                de la viabilidad jurídica / documental.
+                            </div>
                             <group>
-                                <field name="performance_notes"/>
+                                <field name="purchase_evaluation_count"/>
+                                <field name="performance_percent" widget="progressbar"/>
+                            </group>
+                            <button
+                                name="action_open_purchase_evaluations"
+                                type="object"
+                                string="Ver historial de compras evaluadas"
+                                class="btn-primary"
+                            />
+                            <group>
+                                <field name="performance_notes" placeholder="Notas generales del desempeño del proveedor..."/>
                             </group>
                         </page>
                     </notebook>
@@ -268,6 +274,7 @@
         id="menu_partner_rating_root"
         name="Calificadora"
         sequence="90"
+        groups="partner_rating.group_evaluation_user"
     />
     <menuitem
         id="menu_partner_rating"
@@ -275,5 +282,6 @@
         parent="menu_partner_rating_root"
         action="action_partner_rating"
         sequence="10"
+        groups="partner_rating.group_evaluation_user"
     />
 </odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_evaluation_access" model="ir.ui.view">
+        <field name="name">res.users.form.evaluation.access</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Evaluaciones" name="evaluations_access">
+                    <group>
+                        <field name="can_access_evaluations"/>
+                    </group>
+                    <p class="text-muted">
+                        Activa esta opción para dar acceso a los módulos
+                        Calificadora y Eval. Compras.
+                        Las pestañas Documentos y Datos de proveedor en contactos
+                        siguen visibles para todos los usuarios.
+                    </p>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

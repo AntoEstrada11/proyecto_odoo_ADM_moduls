@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="pe_doc_three_quotes" model="purchase.evaluation.document.type">
+        <field name="name">3 cotizaciones de la compra</field>
+        <field name="code">three_quotes</field>
+        <field name="sequence">10</field>
+        <field name="required" eval="True"/>
+        <field name="instructions">Cotizaciones a nombre de IURD para este bien/servicio.</field>
+    </record>
+    <record id="pe_doc_need_justification" model="purchase.evaluation.document.type">
+        <field name="name">Justificación de la necesidad</field>
+        <field name="code">need_justification</field>
+        <field name="sequence">20</field>
+        <field name="required" eval="True"/>
+        <field name="instructions">Motivo de la compra y área solicitante.</field>
+    </record>
+    <record id="pe_doc_authorization" model="purchase.evaluation.document.type">
+        <field name="name">Autorización firmada</field>
+        <field name="code">authorization</field>
+        <field name="sequence">30</field>
+        <field name="required" eval="True"/>
+        <field name="instructions">Autorización del administrador / responsable según monto.</field>
+    </record>
+    <record id="pe_doc_accepted_quote" model="purchase.evaluation.document.type">
+        <field name="name">Cotización o contrato aceptado</field>
+        <field name="code">accepted_quote</field>
+        <field name="sequence">40</field>
+        <field name="required" eval="True"/>
+        <field name="instructions">Documento comercial que se pretende contratar.</field>
+    </record>
+    <record id="pe_doc_compliance_validation" model="purchase.evaluation.document.type">
+        <field name="name">Validación de cumplimiento (si aplica por monto)</field>
+        <field name="code">compliance_validation</field>
+        <field name="sequence">50</field>
+        <field name="required" eval="False"/>
+        <field name="instructions">Requerido cuando el monto supera el umbral de políticas internas.</field>
+    </record>
+    <record id="pe_doc_other" model="purchase.evaluation.document.type">
+        <field name="name">Otro documento de la compra</field>
+        <field name="code">other</field>
+        <field name="sequence">90</field>
+        <field name="required" eval="False"/>
+        <field name="instructions">Adjunto adicional relacionado con esta requisición.</field>
+    </record>
+</odoo>

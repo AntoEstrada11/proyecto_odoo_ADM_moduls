@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import AccessError
 
 
 class ResPartner(models.Model):
@@ -82,8 +83,9 @@ class ResPartner(models.Model):
         'rating_ids.score_percent',
     )
     def _compute_rating_summary(self):
+        Rating = self.env['partner.rating'].sudo()
         for partner in self:
-            rating = partner.rating_ids[:1]
+            rating = Rating.search([('partner_id', '=', partner.id)], limit=1)
             partner.rating_id = rating
             partner.has_rating = bool(rating)
             partner.rating_summary_date = rating.date if rating else False
@@ -99,6 +101,11 @@ class ResPartner(models.Model):
 
     def action_open_partner_rating(self):
         self.ensure_one()
+        if not self.env.user.has_group('partner_rating.group_evaluation_user'):
+            raise AccessError(_(
+                'No tiene permiso para abrir o crear evaluaciones. '
+                'Pida a un administrador que active "Acceso a evaluaciones" en su usuario.'
+            ))
         if self.rating_id:
             return {
                 'type': 'ir.actions.act_window',

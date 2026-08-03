@@ -15,12 +15,12 @@ class PartnerRatingScoreHelpWizard(models.TransientModel):
     )
     viability_percent = fields.Float(
         related='rating_id.viability_percent',
-        string='% Viabilidad documental',
+        string='% Viabilidad jurídica / documental',
         readonly=True,
     )
     performance_percent = fields.Float(
         related='rating_id.performance_percent',
-        string='% Desempeño comercial',
+        string='% Desempeño (historial compras)',
         readonly=True,
     )
     score_percent = fields.Float(
@@ -50,24 +50,25 @@ class PartnerRatingScoreHelpWizard(models.TransientModel):
         return _(
             """
             <div>
-              <p><b>1. %% Viabilidad documental</b></p>
+              <p><b>1. %% Viabilidad jurídica / documental</b></p>
               <ul>
-                <li>Documentos: No recibido 0 · Recibido 1 · Aprobado 2</li>
-                <li>Averiguaciones: Pendiente 0 · Realizada 1 · Favorable 2 · Con hallazgos 0</li>
-                <li>Criterios internos: Sí suma 2 puntos al máximo y al obtenido</li>
+                <li>Documentos del proveedor: No recibido 0 · Recibido 1 · Aprobado 2</li>
+                <li>Averiguaciones (SAT, buró, domicilio…): Pendiente 0 · Realizada 1 · Favorable 2 · Con hallazgos 0</li>
+                <li>Criterios internos: Sí suma 2 puntos</li>
               </ul>
               <p><b>2. %% Desempeño comercial</b></p>
               <ul>
-                <li>Cada rubro: Sin calificar 0 … Excelente 5</li>
-                <li>%% = puntos obtenidos / (rubros × 5) × 100</li>
+                <li>Se obtiene del historial de compras finalizadas (módulo Eval. Compras)</li>
+                <li>En cada compra se califican 5 rubros: Precio, Calidad, Entrega, Atención, Cumplimiento (0 a 5)</li>
+                <li>%% = suma de puntos de todas las compras / suma de máximos × 100</li>
+                <li>Compras finalizadas actuales: %(count)s</li>
               </ul>
               <p><b>3. %% Global ponderado</b></p>
               <p>
                 Global = (Viabilidad × %(w_v)s%%) + (Desempeño × %(w_p)s%%)
               </p>
               <p>
-                Si todavía no califica ningún rubro de desempeño, el global
-                usa solo la viabilidad.
+                Si aún no hay compras finalizadas, el global usa solo la viabilidad.
               </p>
               <p class="text-muted">
                 Actual: Viabilidad %(v)s%% · Desempeño %(p)s%% · Global %(g)s%%
@@ -80,6 +81,7 @@ class PartnerRatingScoreHelpWizard(models.TransientModel):
             'v': round(rating.viability_percent or 0.0, 1),
             'p': round(rating.performance_percent or 0.0, 1),
             'g': round(rating.score_percent or 0.0, 1),
+            'count': rating.purchase_evaluation_count or 0,
         }
 
     def action_apply_weights(self):

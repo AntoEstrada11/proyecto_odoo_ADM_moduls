@@ -144,31 +144,37 @@ class PartnerRating(models.Model):
     performance_line_ids = fields.One2many(
         'partner.rating.performance.line',
         'rating_id',
-        string='Desempeño comercial',
+        string='Desempeño comercial (legado)',
+        help='Ya no se usa para calificar. El desempeño viene del historial de compras.',
     )
     performance_notes = fields.Text(string='Notas de desempeño')
+    purchase_evaluation_count = fields.Integer(
+        string='Compras evaluadas',
+        compute='_compute_score',
+        store=True,
+    )
     weight_viability = fields.Float(
         string='Peso viabilidad %',
         default=60.0,
-        help='Peso del bloque documental/averiguaciones en el global.',
+        help='Peso de viabilidad jurídica/documental + averiguaciones en el global.',
     )
     weight_performance = fields.Float(
         string='Peso desempeño %',
         default=40.0,
-        help='Peso del bloque comercial en el global.',
+        help='Peso del desempeño comercial (historial de compras finalizadas).',
     )
 
     viability_score_obtained = fields.Float(compute='_compute_score', store=True)
     viability_score_max = fields.Float(compute='_compute_score', store=True)
     viability_percent = fields.Float(
-        string='% Viabilidad documental',
+        string='% Viabilidad jurídica / documental',
         compute='_compute_score',
         store=True,
     )
     performance_score_obtained = fields.Float(compute='_compute_score', store=True)
     performance_score_max = fields.Float(compute='_compute_score', store=True)
     performance_percent = fields.Float(
-        string='% Desempeño comercial',
+        string='% Desempeño comercial (historial compras)',
         compute='_compute_score',
         store=True,
     )
@@ -204,11 +210,11 @@ class PartnerRating(models.Model):
     @api.depends(
         'document_line_ids.situation',
         'research_line_ids.situation',
-        'performance_line_ids.score',
         'meets_internal_criteria',
         'analysis_status',
         'weight_viability',
         'weight_performance',
+        'partner_id',
     )
     def _compute_score(self):
         doc_score_map = {
@@ -225,7 +231,6 @@ class PartnerRating(models.Model):
         for rating in self:
             doc_lines = rating.document_line_ids
             research_lines = rating.research_line_ids
-            perf_lines = rating.performance_line_ids
 
             viability_max = (len(doc_lines) * 2.0) + (len(research_lines) * 2.0)
             viability_obtained = sum(
@@ -245,21 +250,19 @@ class PartnerRating(models.Model):
                 (viability_obtained / viability_max * 100.0) if viability_max else 0.0
             )
 
-            performance_max = len(perf_lines) * 5.0
-            performance_obtained = sum(float(line.score or 0) for line in perf_lines)
-            performance_percent = (
-                (performance_obtained / performance_max * 100.0)
-                if performance_max else 0.0
-            )
+            (
+                performance_obtained,
+                performance_max,
+                performance_percent,
+                purchase_count,
+            ) = rating._get_purchase_performance_stats()
 
             w_v = rating.weight_viability or 0.0
             w_p = rating.weight_performance or 0.0
             if abs(w_v + w_p - 100.0) > 0.01:
                 w_v, w_p = 60.0, 40.0
 
-            rated_perf = any((line.score or '0') != '0' for line in perf_lines)
-            if not perf_lines or not rated_perf:
-                # Sin desempeño calificado aún, el global = viabilidad
+            if not purchase_count:
                 global_percent = viability_percent
             else:
                 global_percent = (
@@ -282,10 +285,27 @@ class PartnerRating(models.Model):
             rating.performance_score_obtained = performance_obtained
             rating.performance_score_max = performance_max
             rating.performance_percent = performance_percent
+            rating.purchase_evaluation_count = purchase_count
             rating.score_obtained = viability_obtained + performance_obtained
             rating.score_max = viability_max + performance_max
             rating.score_percent = global_percent
             rating.rating_level = level
+
+    def _get_purchase_performance_stats(self):
+        """Desempeño = puntos acumulados de compras finalizadas del proveedor."""
+        self.ensure_one()
+        if 'purchase.evaluation' not in self.env or not self.partner_id:
+            return 0.0, 0.0, 0.0, 0
+        purchases = self.env['purchase.evaluation'].sudo().search([
+            ('partner_id', '=', self.partner_id.id),
+            ('state', '=', 'done'),
+        ])
+        if not purchases:
+            return 0.0, 0.0, 0.0, 0
+        obtained = sum(purchases.mapped('purchase_score_obtained'))
+        maximum = sum(purchases.mapped('purchase_score_max'))
+        percent = (obtained / maximum * 100.0) if maximum else 0.0
+        return obtained, maximum, percent, len(purchases)
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
@@ -389,15 +409,27 @@ class PartnerRating(models.Model):
                 }
                 for index, name in enumerate(RESEARCH_TEMPLATES, start=1)
             ])
-        if not self.performance_line_ids:
-            self.env['partner.rating.performance.line'].create([
-                {
-                    'rating_id': self.id,
-                    'sequence': index,
-                    'name': name,
-                }
-                for index, name in enumerate(PERFORMANCE_TEMPLATES, start=1)
-            ])
+
+    def action_open_purchase_evaluations(self):
+        self.ensure_one()
+        if 'purchase.evaluation' not in self.env:
+            raise UserError(_(
+                'Instale el módulo "Evaluación de Compras / Requisiciones" '
+                'para consultar el historial de desempeño.'
+            ))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Historial de compras evaluadas'),
+            'res_model': 'purchase.evaluation',
+            'view_mode': 'tree,form',
+            'domain': [
+                ('partner_id', '=', self.partner_id.id),
+                ('state', '=', 'done'),
+            ],
+            'context': {
+                'default_partner_id': self.partner_id.id,
+            },
+        }
 
     def action_load_checklist(self):
         for rating in self:

@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_purchase_evaluation_tree" model="ir.ui.view">
+        <field name="name">purchase.evaluation.tree</field>
+        <field name="model">purchase.evaluation</field>
+        <field name="arch" type="xml">
+            <tree string="Evaluaciones de compra">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="source_ref"/>
+                <field name="amount_total"/>
+                <field name="docs_complete"/>
+                <field name="purchase_percent" widget="progressbar"/>
+                <field name="recommendation"/>
+                <field name="state"
+                         decoration-info="state == 'docs'"
+                         decoration-warning="state == 'evaluation'"
+                         decoration-success="state == 'done'"
+                         decoration-muted="state == 'cancelled'"
+                         widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_purchase_evaluation_form" model="ir.ui.view">
+        <field name="name">purchase.evaluation.form</field>
+        <field name="model">purchase.evaluation</field>
+        <field name="arch" type="xml">
+            <form string="Evaluación de compra / requisición">
+                <header>
+                    <button
+                        name="action_load_checklists"
+                        type="object"
+                        string="Cargar checklists"
+                        class="btn-secondary"
+                        invisible="state in ('done', 'cancelled')"
+                    />
+                    <button
+                        name="action_start_evaluation"
+                        type="object"
+                        string="Iniciar evaluación"
+                        class="btn-primary"
+                        invisible="state != 'docs'"
+                        confirm="Se iniciará la evaluación de la compra. Verifique que la documentación obligatoria esté completa."
+                    />
+                    <button
+                        name="action_back_to_docs"
+                        type="object"
+                        string="Volver a documentación"
+                        invisible="state != 'evaluation'"
+                    />
+                    <button
+                        name="action_set_done"
+                        type="object"
+                        string="Finalizar"
+                        class="btn-primary"
+                        invisible="state != 'evaluation'"
+                    />
+                    <button
+                        name="action_set_cancelled"
+                        type="object"
+                        string="Cancelar"
+                        invisible="state in ('done', 'cancelled')"
+                        confirm="¿Cancelar esta evaluación de compra?"
+                    />
+                    <button
+                        name="action_reset_docs"
+                        type="object"
+                        string="Reabrir documentación"
+                        invisible="state != 'cancelled'"
+                    />
+                    <button
+                        name="action_open_partner_rating"
+                        type="object"
+                        string="Ver evaluación del proveedor"
+                        class="btn-secondary"
+                    />
+                    <button
+                        name="action_open_source"
+                        type="object"
+                        string="Abrir compra / requisición origen"
+                        class="btn-secondary"
+                        invisible="not source_model or not source_res_id"
+                    />
+                    <field name="state" widget="statusbar" statusbar_visible="docs,evaluation,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Evaluación compra - ..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Compra">
+                            <field name="partner_id" readonly="state != 'docs'"/>
+                            <field name="company_type"/>
+                            <field name="date"/>
+                            <field name="amount_total"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="description" placeholder="Qué se compra y para qué..."/>
+                        </group>
+                        <group string="Enlace a producción">
+                            <field name="source_ref" placeholder="PO00012 / REQ-45 / ..."/>
+                            <field name="source_model" placeholder="purchase.order"/>
+                            <field name="source_res_id"/>
+                            <field name="source_display" readonly="1"/>
+                            <div class="text-muted" colspan="2">
+                                Para ligar desde el módulo de Compras de producción use
+                                link_to_record() o create_from_record() en purchase.evaluation.
+                            </div>
+                        </group>
+                    </group>
+                    <group string="Resumen del proveedor (Calificadora)">
+                        <group>
+                            <field name="partner_rating_id" invisible="1"/>
+                            <field name="partner_rating_state"/>
+                            <field name="partner_rating_level"/>
+                        </group>
+                        <group>
+                            <field name="partner_viability_percent" widget="progressbar"/>
+                            <field name="partner_performance_percent" widget="progressbar"/>
+                            <field name="partner_global_percent" widget="progressbar"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="1. Documentación de la requisición" name="docs">
+                            <div class="alert alert-info" role="alert" invisible="docs_complete">
+                                Primero adjunte y marque los documentos obligatorios como Recibido o Aprobado.
+                                Hasta entonces no se puede iniciar la evaluación de la compra.
+                            </div>
+                            <div class="alert alert-success" role="alert" invisible="not docs_complete">
+                                Documentación obligatoria completa. Ya puede iniciar la evaluación.
+                            </div>
+                            <field name="docs_complete" invisible="1"/>
+                            <field name="document_line_ids" nolabel="1" readonly="state in ('done', 'cancelled')">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="document_type_id" optional="hide"/>
+                                    <field name="name"/>
+                                    <field name="required"/>
+                                    <field name="situation"/>
+                                    <field name="warnings"/>
+                                    <field name="file_name" column_invisible="1"/>
+                                    <field name="file" filename="file_name" widget="binary"/>
+                                    <field name="notes"/>
+                                </tree>
+                            </field>
+                            <group>
+                                <field name="docs_notes" readonly="state in ('done', 'cancelled')"/>
+                            </group>
+                        </page>
+
+                        <page
+                            string="2. Evaluación de la compra"
+                            name="evaluation"
+                            invisible="state == 'docs'"
+                        >
+                            <p class="text-muted">
+                                Desempeño comercial de esta compra (los 5 rubros alimentan
+                                el historial del proveedor en Calificadora).
+                                Escala: Sin calificar 0 · Malo 1 · Regular 2 · Bueno 3 · Muy bueno 4 · Excelente 5.
+                            </p>
+                            <group>
+                                <field name="purchase_percent" widget="progressbar"/>
+                            </group>
+                            <field name="criteria_line_ids" nolabel="1" readonly="state != 'evaluation'">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="score"/>
+                                    <field name="warnings"/>
+                                    <field name="notes"/>
+                                </tree>
+                            </field>
+                            <group>
+                                <field name="recommendation" readonly="state != 'evaluation'"/>
+                                <field name="recommendation_reason" readonly="state != 'evaluation'"/>
+                                <field name="criteria_notes" readonly="state != 'evaluation'"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_purchase_evaluation_document_type_tree" model="ir.ui.view">
+        <field name="name">purchase.evaluation.document.type.tree</field>
+        <field name="model">purchase.evaluation.document.type</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="required"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_purchase_evaluation_document_type_form" model="ir.ui.view">
+        <field name="name">purchase.evaluation.document.type.form</field>
+        <field name="model">purchase.evaluation.document.type</field>
+        <field name="arch" type="xml">
+            <form string="Tipo de documento de compra">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="sequence"/>
+                        <field name="required"/>
+                        <field name="active"/>
+                        <field name="instructions"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_purchase_evaluation" model="ir.actions.act_window">
+        <field name="name">Evaluaciones de compra</field>
+        <field name="res_model">purchase.evaluation</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_purchase_evaluation_document_type" model="ir.actions.act_window">
+        <field name="name">Tipos de documento (compra)</field>
+        <field name="res_model">purchase.evaluation.document.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_purchase_evaluation_root"
+        name="Eval. Compras"
+        sequence="95"
+        groups="partner_rating.group_evaluation_user"
+    />
+    <menuitem
+        id="menu_purchase_evaluation"
+        name="Evaluaciones"
+        parent="menu_purchase_evaluation_root"
+        action="action_purchase_evaluation"
+        sequence="10"
+        groups="partner_rating.group_evaluation_user"
+    />
+    <menuitem
+        id="menu_purchase_evaluation_doc_types"
+        name="Tipos de documento"
+        parent="menu_purchase_evaluation_root"
+        action="action_purchase_evaluation_document_type"
+        sequence="20"
+        groups="partner_rating.group_evaluation_user"
+    />
+</odoo>
