@@ -2,15 +2,16 @@
 <odoo>
     <record id="module_category_evaluations" model="ir.module.category">
         <field name="name">Evaluaciones</field>
-        <field name="description">Acceso a Calificadora de proveedores y Evaluación de compras</field>
+        <field name="description">Acceso a Calificadora y Evaluación de compras</field>
         <field name="sequence">25</field>
     </record>
 
+    <!-- Grupo de Calificadora (evaluación de proveedores / documentos) -->
     <record id="group_evaluation_user" model="res.groups">
-        <field name="name">Usuario de evaluaciones</field>
+        <field name="name">Calificadora de proveedores</field>
         <field name="category_id" ref="module_category_evaluations"/>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
-        <field name="comment">Puede ver y usar Calificadora y Eval. Compras.</field>
+        <field name="comment">Acceso al módulo Calificadora (evaluación documental del proveedor).</field>
         <field name="users" eval="[(4, ref('base.user_admin'))]"/>
     </record>
 </odoo>

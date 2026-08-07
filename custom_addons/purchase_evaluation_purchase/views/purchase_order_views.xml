@@ -12,6 +12,7 @@
                     class="oe_stat_button"
                     icon="fa-check-square-o"
                     invisible="purchase_evaluation_count == 0"
+                    groups="purchase_evaluation.group_purchase_evaluation_user"
                 >
                     <field name="purchase_evaluation_count" widget="statinfo" string="Eval. compra"/>
                 </button>
@@ -22,6 +23,7 @@
                     icon="fa-plus"
                     invisible="purchase_evaluation_count != 0"
                     string="Crear eval. compra"
+                    groups="purchase_evaluation.group_purchase_evaluation_user"
                 />
             </div>
         </field>

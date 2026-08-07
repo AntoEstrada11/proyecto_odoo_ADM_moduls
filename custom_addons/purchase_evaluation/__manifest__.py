@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Evaluación de Compras / Requisiciones',
-    'version': '17.0.1.2.0',
+    'version': '17.0.1.3.0',
     'category': 'Purchases',
     'summary': 'Documentación y evaluación por compra/requisición, enlazable a Compras',
     'description': """
@@ -16,6 +16,7 @@ Enlace a producción:
 """,
     'depends': ['base', 'contacts', 'mail', 'partner_documents', 'partner_rating'],
     'data': [
+        'security/purchase_evaluation_security.xml',
         'security/ir.model.access.csv',
         'data/purchase_evaluation_document_type_data.xml',
         'views/purchase_evaluation_views.xml',

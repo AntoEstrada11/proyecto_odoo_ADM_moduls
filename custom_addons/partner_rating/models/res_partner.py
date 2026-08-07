@@ -103,8 +103,8 @@ class ResPartner(models.Model):
         self.ensure_one()
         if not self.env.user.has_group('partner_rating.group_evaluation_user'):
             raise AccessError(_(
-                'No tiene permiso para abrir o crear evaluaciones. '
-                'Pida a un administrador que active "Acceso a evaluaciones" en su usuario.'
+                'No tiene permiso para abrir o crear evaluaciones de proveedor. '
+                'Pida a un administrador que active "Acceso a Calificadora" en su usuario.'
             ))
         if self.rating_id:
             return {

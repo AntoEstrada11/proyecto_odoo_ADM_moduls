@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_purchase_evaluation_user" model="res.groups">
+        <field name="name">Evaluación de compras</field>
+        <field name="category_id" ref="partner_rating.module_category_evaluations"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Acceso al módulo Eval. Compras (requisición / compra).</field>
+        <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+</odoo>

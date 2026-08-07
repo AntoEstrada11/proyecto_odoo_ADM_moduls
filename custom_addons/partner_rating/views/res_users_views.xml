@@ -7,14 +7,15 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
                 <page string="Evaluaciones" name="evaluations_access">
-                    <group>
-                        <field name="can_access_evaluations"/>
+                    <group string="Módulos de evaluación">
+                        <field name="can_access_calificadora"/>
+                        <field name="can_access_purchase_evaluation"/>
                     </group>
                     <p class="text-muted">
-                        Activa esta opción para dar acceso a los módulos
-                        Calificadora y Eval. Compras.
-                        Las pestañas Documentos y Datos de proveedor en contactos
-                        siguen visibles para todos los usuarios.
+                        Activa cada bandera según el módulo que deba ver el usuario
+                        en el menú de aplicaciones.
+                        Documentos y Datos de proveedor en contactos siguen
+                        disponibles para todos.
                     </p>
                 </page>
             </xpath>
