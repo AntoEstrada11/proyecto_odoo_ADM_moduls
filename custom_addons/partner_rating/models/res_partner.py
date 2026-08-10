@@ -6,14 +6,16 @@ from odoo.exceptions import AccessError
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    rating_ids = fields.One2many(
+    # NO usar rating_ids/rating_id: chocan con mail.thread + módulo rating
+    # (domain res_model) y provocan KeyError al crear partner.rating en release.
+    partner_rating_ids = fields.One2many(
         'partner.rating',
         'partner_id',
-        string='Evaluaciones',
+        string='Evaluaciones Calificadora',
     )
-    rating_id = fields.Many2one(
+    partner_rating_id = fields.Many2one(
         'partner.rating',
-        string='Evaluación',
+        string='Evaluación Calificadora',
         compute='_compute_rating_summary',
     )
     rating_summary_date = fields.Date(
@@ -72,21 +74,21 @@ class ResPartner(models.Model):
     has_rating = fields.Boolean(compute='_compute_rating_summary')
 
     @api.depends(
-        'rating_ids',
-        'rating_ids.date',
-        'rating_ids.state',
-        'rating_ids.rating_level',
-        'rating_ids.risk_level',
-        'rating_ids.analysis_status',
-        'rating_ids.viability_percent',
-        'rating_ids.performance_percent',
-        'rating_ids.score_percent',
+        'partner_rating_ids',
+        'partner_rating_ids.date',
+        'partner_rating_ids.state',
+        'partner_rating_ids.rating_level',
+        'partner_rating_ids.risk_level',
+        'partner_rating_ids.analysis_status',
+        'partner_rating_ids.viability_percent',
+        'partner_rating_ids.performance_percent',
+        'partner_rating_ids.score_percent',
     )
     def _compute_rating_summary(self):
         Rating = self.env['partner.rating'].sudo()
         for partner in self:
             rating = Rating.search([('partner_id', '=', partner.id)], limit=1)
-            partner.rating_id = rating
+            partner.partner_rating_id = rating
             partner.has_rating = bool(rating)
             partner.rating_summary_date = rating.date if rating else False
             partner.rating_summary_state = rating.state if rating else False
@@ -106,12 +108,12 @@ class ResPartner(models.Model):
                 'No tiene permiso para abrir o crear evaluaciones de proveedor. '
                 'Pida a un administrador que active "Acceso a Calificadora" en su usuario.'
             ))
-        if self.rating_id:
+        if self.partner_rating_id:
             return {
                 'type': 'ir.actions.act_window',
                 'name': 'Evaluación',
                 'res_model': 'partner.rating',
-                'res_id': self.rating_id.id,
+                'res_id': self.partner_rating_id.id,
                 'view_mode': 'form',
                 'target': 'current',
             }

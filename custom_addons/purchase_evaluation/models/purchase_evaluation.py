@@ -166,10 +166,12 @@ class PurchaseEvaluation(models.Model):
             else:
                 rec.source_display = False
 
-    @api.depends('partner_id', 'partner_id.rating_ids')
+    @api.depends('partner_id', 'partner_id.partner_rating_ids')
     def _compute_partner_rating(self):
         for rec in self:
-            rec.partner_rating_id = rec.partner_id.rating_ids[:1] if rec.partner_id else False
+            rec.partner_rating_id = (
+                rec.partner_id.partner_rating_ids[:1] if rec.partner_id else False
+            )
 
     @api.depends('document_line_ids.situation', 'document_line_ids.required')
     def _compute_docs_complete(self):

@@ -13,7 +13,7 @@
                 <group invisible="not has_rating">
                     <group string="Estatus">
                         <field name="has_rating" invisible="1"/>
-                        <field name="rating_id" invisible="1"/>
+                        <field name="partner_rating_id" invisible="1"/>
                         <field name="rating_summary_date"/>
                         <field name="rating_summary_state"/>
                         <field name="rating_summary_level"/>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Evaluación de Compras / Requisiciones',
-    'version': '17.0.1.3.0',
+    'version': '17.0.1.3.1',
     'category': 'Purchases',
     'summary': 'Documentación y evaluación por compra/requisición, enlazable a Compras',
     'description': """
