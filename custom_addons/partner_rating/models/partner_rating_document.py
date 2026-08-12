@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class PartnerRatingDocumentLine(models.Model):
@@ -58,3 +58,17 @@ class PartnerRatingDocumentLine(models.Model):
         string='Archivo digitalizado',
         help='Documento subido en la pestaña Documentos del contacto',
     )
+
+    @api.onchange('document_type_id')
+    def _onchange_document_type_id(self):
+        if not self.document_type_id or not self.rating_id.partner_id:
+            return
+        uploaded = self.rating_id.partner_id.document_ids.filtered(
+            lambda d: d.document_type_id == self.document_type_id
+        )[:1]
+        if uploaded:
+            self.partner_document_id = uploaded
+            if self.situation == 'not_received':
+                self.situation = 'received'
+        else:
+            self.partner_document_id = False

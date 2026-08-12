@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Calificadora de Proveedores',
-    'version': '17.0.6.7.0',
+    'version': '17.0.6.8.0',
     'category': 'Purchases',
     'summary': 'Evaluación de proveedores con checklist por tipo de persona',
     'description': """

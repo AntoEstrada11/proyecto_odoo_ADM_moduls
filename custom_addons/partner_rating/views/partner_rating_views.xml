@@ -183,37 +183,40 @@
                             </group>
                         </page>
 
-                        <page string="2. Criterios internos" name="criteria">
-                            <group>
-                                <field name="meets_internal_criteria" widget="radio"/>
-                                <field name="analysis_status" widget="radio"/>
-                                <field name="status_reason" placeholder="Razón de estatus..."/>
-                            </group>
-                        </page>
-
-                        <page string="3. Documentos evaluados" name="documents">
+                        <page string="2. Documentos evaluados" name="documents">
                             <p class="text-muted">
-                                Parte de la viabilidad jurídica / documental.
-                                Puntaje: No recibido 0 · Recibido 1 · Aprobado 2.
+                                Todas las filas de esta lista se evalúan y suman al % de viabilidad.
+                                Puntaje por documento: No recibido 0 · Recibido 1 · Aprobado 2.
+                                Agregue tipos que falten o elimine los que no apliquen a esta evaluación.
                             </p>
-                            <field name="document_line_ids" nolabel="1">
-                                <tree editable="bottom" create="0" delete="0">
+                            <group>
+                                <field name="document_line_count" string="Documentos en checklist"/>
+                                <field name="document_approved_count" string="Aprobados"/>
+                                <field name="document_pending_count" string="Pendientes / no recibidos"/>
+                            </group>
+                            <field name="document_line_ids" nolabel="1" readonly="state == 'done'">
+                                <tree editable="bottom">
                                     <field name="sequence" widget="handle"/>
-                                    <field name="document_type_id" optional="hide"/>
-                                    <field name="name"/>
-                                    <field name="person_type"/>
+                                    <field name="document_type_id"
+                                             required="1"
+                                             domain="['|', ('person_type', '=', 'both'), ('person_type', '=', parent.company_type)]"
+                                             options="{'no_create': True}"/>
+                                    <field name="name" optional="hide"/>
+                                    <field name="person_type" optional="show"/>
                                     <field name="situation"/>
-                                    <field name="partner_document_id"/>
+                                    <field name="partner_document_id"
+                                             options="{'no_create': True}"
+                                             domain="[('partner_id', '=', parent.partner_id)]"/>
                                     <field name="warnings"/>
                                 </tree>
                             </field>
                             <group>
-                                <field name="documents_notes"/>
-                                <field name="post_hire_notes"/>
+                                <field name="documents_notes" readonly="state == 'done'"/>
+                                <field name="post_hire_notes" readonly="state == 'done'"/>
                             </group>
                         </page>
 
-                        <page string="4. Averiguaciones" name="research">
+                        <page string="3. Averiguaciones" name="research">
                             <p class="text-muted">
                                 Parte de la viabilidad jurídica / documental
                                 (investigaciones en portales: SAT, buró, domicilio, etc.).
@@ -232,6 +235,14 @@
                             </field>
                             <group>
                                 <field name="research_notes"/>
+                            </group>
+                        </page>
+
+                        <page string="4. Criterios internos" name="criteria">
+                            <group>
+                                <field name="meets_internal_criteria" widget="radio"/>
+                                <field name="analysis_status" widget="radio"/>
+                                <field name="status_reason" placeholder="Razón de estatus..."/>
                             </group>
                         </page>
 

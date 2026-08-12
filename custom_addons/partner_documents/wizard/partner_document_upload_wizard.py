@@ -56,7 +56,11 @@ class PartnerDocumentUploadWizard(models.TransientModel):
     )
     file = fields.Binary(string='Archivo', required=True, attachment=False)
     file_name = fields.Char(string='Nombre de archivo')
-
+    is_confidential = fields.Boolean(
+        string='Documento confidencial',
+        default=False,
+        help='Solo usuarios con "Acceso a documentos confidenciales" podrán verlo.',
+    )
     show_vat = fields.Boolean(compute='_compute_show_fields', string='Show VAT')
     show_legal_representative = fields.Boolean(compute='_compute_show_fields', string='Show Rep Name')
     show_legal_representative_id = fields.Boolean(compute='_compute_show_fields', string='Show Rep ID')
@@ -156,6 +160,15 @@ class PartnerDocumentUploadWizard(models.TransientModel):
         if not document_name:
             raise UserError(_('Escriba el nombre del documento.'))
 
+        if self.is_confidential and not self.env.user.has_group(
+            'partner_documents.group_confidential_documents'
+        ):
+            raise UserError(_(
+                'No tiene permiso para marcar documentos como confidenciales. '
+                'Pida a un administrador que active "Acceso a documentos confidenciales" '
+                'en su usuario.'
+            ))
+
         doc_type = self.document_type_id
         if doc_type and not doc_type.applies_to_person_type(person_type):
             raise UserError(_(
@@ -181,6 +194,7 @@ class PartnerDocumentUploadWizard(models.TransientModel):
             'file': self.file,
             'file_name': self.file_name,
             'person_type': doc_type.person_type if doc_type else person_type,
+            'is_confidential': self.is_confidential,
         })
 
         if doc_type and doc_type.code != 'otro' and 'partner.rating.document.line' in self.env:

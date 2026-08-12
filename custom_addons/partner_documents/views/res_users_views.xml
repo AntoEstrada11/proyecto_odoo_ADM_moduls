@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_confidential_documents" model="ir.ui.view">
+        <field name="name">res.users.form.confidential.documents</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Documentos proveedor" name="partner_documents_access">
+                    <group string="Visibilidad de documentos">
+                        <field name="can_access_confidential_documents"/>
+                    </group>
+                    <p class="text-muted">
+                        Activa esta bandera para que el usuario pueda ver y administrar
+                        documentos marcados como confidenciales en Contactos.
+                        También aplica al evaluar documentación en Calificadora.
+                        Asigne después a las personas que realicen esa función.
+                    </p>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

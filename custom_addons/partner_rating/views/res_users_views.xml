@@ -14,8 +14,8 @@
                     <p class="text-muted">
                         Activa cada bandera según el módulo que deba ver el usuario
                         en el menú de aplicaciones.
-                        Documentos y Datos de proveedor en contactos siguen
-                        disponibles para todos.
+                        La visibilidad de documentos confidenciales se administra
+                        aparte (pestaña Documentos proveedor del usuario).
                     </p>
                 </page>
             </xpath>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_partner_documents" model="ir.module.category">
+        <field name="name">Documentos de proveedor</field>
+        <field name="description">Acceso a documentos digitalizados de contactos/proveedores</field>
+        <field name="sequence">26</field>
+    </record>
+
+    <record id="group_confidential_documents" model="res.groups">
+        <field name="name">Documentos confidenciales</field>
+        <field name="category_id" ref="module_category_partner_documents"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">
+            Puede ver, editar y administrar documentos marcados como confidenciales
+            (por ejemplo INE, constancias). Requerido también al evaluar en Calificadora.
+        </field>
+        <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- Alinea la bandera del admin con el grupo -->
+    <record id="base.user_admin" model="res.users">
+        <field name="can_access_confidential_documents" eval="True"/>
+    </record>
+
+    <!-- Sin el grupo: solo documentos no confidenciales -->
+    <record id="partner_document_rule_public" model="ir.rule">
+        <field name="name">Documentos proveedor: no confidenciales</field>
+        <field name="model_id" ref="model_partner_document"/>
+        <field name="domain_force">[('is_confidential', '=', False)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Con el grupo: todos los documentos (OR con la regla anterior) -->
+    <record id="partner_document_rule_confidential" model="ir.rule">
+        <field name="name">Documentos proveedor: incluye confidenciales</field>
+        <field name="model_id" ref="model_partner_document"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_confidential_documents'))]"/>
+    </record>
+</odoo>

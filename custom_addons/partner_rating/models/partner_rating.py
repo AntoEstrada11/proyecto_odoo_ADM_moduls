@@ -121,6 +121,18 @@ class PartnerRating(models.Model):
         'rating_id',
         string='Documentos evaluados',
     )
+    document_line_count = fields.Integer(
+        string='Documentos en checklist',
+        compute='_compute_document_line_stats',
+    )
+    document_approved_count = fields.Integer(
+        string='Documentos aprobados',
+        compute='_compute_document_line_stats',
+    )
+    document_pending_count = fields.Integer(
+        string='Documentos pendientes',
+        compute='_compute_document_line_stats',
+    )
     documents_notes = fields.Text(string='Notas de documentos')
     post_hire_notes = fields.Text(
         string='Al ser contratado será necesario presentar',
@@ -196,6 +208,16 @@ class PartnerRating(models.Model):
         compute='_compute_score',
         store=True,
     )
+
+    @api.depends('document_line_ids', 'document_line_ids.situation')
+    def _compute_document_line_stats(self):
+        for rating in self:
+            lines = rating.document_line_ids
+            rating.document_line_count = len(lines)
+            rating.document_approved_count = len(lines.filtered(lambda l: l.situation == 'approved'))
+            rating.document_pending_count = len(lines.filtered(
+                lambda l: l.situation == 'not_received'
+            ))
 
     @api.constrains('weight_viability', 'weight_performance')
     def _check_weights(self):

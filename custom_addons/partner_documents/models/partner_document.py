@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import mimetypes
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import AccessError
 
 
 class PartnerDocument(models.Model):
@@ -33,6 +34,13 @@ class PartnerDocument(models.Model):
         compute='_compute_person_type',
         store=True,
         readonly=False,
+    )
+    is_confidential = fields.Boolean(
+        string='Confidencial',
+        default=False,
+        index=True,
+        help='Si está activo, solo usuarios con acceso a documentos confidenciales '
+             'pueden ver este archivo (también al evaluar en Calificadora).',
     )
     file = fields.Binary(string='Archivo', required=True, attachment=True)
     file_name = fields.Char(string='Nombre de archivo')
@@ -103,6 +111,14 @@ class PartnerDocument(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            if vals.get('is_confidential') and not self.env.user.has_group(
+                'partner_documents.group_confidential_documents'
+            ):
+                raise AccessError(_(
+                    'No tiene permiso para marcar documentos como confidenciales. '
+                    'Pida a un administrador que active "Acceso a documentos confidenciales" '
+                    'en su usuario.'
+                ))
             file_name = vals.get('file_name')
             if file_name and not vals.get('mimetype'):
                 vals['mimetype'] = self._guess_mimetype(file_name)
@@ -115,6 +131,14 @@ class PartnerDocument(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
+        if 'is_confidential' in vals and not self.env.user.has_group(
+            'partner_documents.group_confidential_documents'
+        ):
+            raise AccessError(_(
+                'No tiene permiso para cambiar el estado confidencial de un documento. '
+                'Pida a un administrador que active "Acceso a documentos confidenciales" '
+                'en su usuario.'
+            ))
         file_name = vals.get('file_name')
         if file_name and 'mimetype' not in vals:
             vals['mimetype'] = self._guess_mimetype(file_name)

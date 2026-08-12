@@ -2,3 +2,4 @@
 from . import partner_document_type
 from . import partner_document
 from . import res_partner
+from . import res_users

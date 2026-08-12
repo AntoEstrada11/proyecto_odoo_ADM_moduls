@@ -8,6 +8,7 @@
                 <field name="image_preview" widget="image" options="{'size': [48, 48]}"/>
                 <field name="document_type_id" optional="show"/>
                 <field name="name" string="Nombre del documento"/>
+                <field name="is_confidential" optional="show"/>
                 <field name="person_type" optional="hide"/>
                 <field name="file_name"/>
                 <field name="mimetype" optional="hide"/>
@@ -26,6 +27,10 @@
                             <field name="document_type_id"/>
                             <field name="name" string="Nombre del documento"/>
                             <field name="person_type"/>
+                            <field
+                                name="is_confidential"
+                                groups="partner_documents.group_confidential_documents"
+                            />
                             <field name="file_name" invisible="1"/>
                             <field name="file" filename="file_name" widget="binary"/>
                             <field name="mimetype" readonly="1"/>
@@ -67,12 +72,15 @@
                         subir documentos con nombre personalizado (tipo «Otro»).
                         Haga clic en un documento para editarlo o reemplazar el archivo;
                         use el ícono de basura para eliminarlo.
+                        Los marcados como confidenciales solo los ven usuarios con
+                        acceso a documentos confidenciales.
                     </p>
                     <field name="document_ids" nolabel="1" mode="tree,form">
                         <tree create="0" delete="0">
                             <field name="image_preview" widget="image" options="{'size': [48, 48]}"/>
                             <field name="document_type_id" optional="show"/>
                             <field name="name" string="Nombre del documento"/>
+                            <field name="is_confidential" optional="show"/>
                             <field name="person_type" optional="hide"/>
                             <field name="file_name"/>
                             <button
@@ -91,6 +99,10 @@
                                         <field name="document_type_id"/>
                                         <field name="name" string="Nombre del documento"/>
                                         <field name="person_type" readonly="1"/>
+                                        <field
+                                            name="is_confidential"
+                                            groups="partner_documents.group_confidential_documents"
+                                        />
                                         <field name="file_name" invisible="1"/>
                                         <field name="file" filename="file_name" widget="binary"/>
                                         <field name="mimetype" readonly="1"/>

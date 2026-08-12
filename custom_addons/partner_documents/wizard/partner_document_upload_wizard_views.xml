@@ -23,12 +23,24 @@
                         />
                         <field name="file_name" invisible="1"/>
                         <field name="file" filename="file_name" widget="binary"/>
+                        <field
+                            name="is_confidential"
+                            groups="partner_documents.group_confidential_documents"
+                        />
                     </group>
                     <group>
                         <field name="instructions" readonly="1" invisible="not document_type_id"/>
                         <div class="text-muted" invisible="not is_custom_document">
                             Escriba el nombre del documento si no está en la lista
                             (use el tipo «Otro» o deje el tipo vacío).
+                        </div>
+                        <div
+                            class="text-muted"
+                            groups="partner_documents.group_confidential_documents"
+                        >
+                            Marque «Documento confidencial» para restringir la vista
+                            a usuarios con acceso a documentos confidenciales
+                            (incluye evaluación en Calificadora).
                         </div>
                     </group>
                 </group>
