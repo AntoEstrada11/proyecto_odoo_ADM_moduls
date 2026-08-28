@@ -44,6 +44,20 @@
                         </div>
                     </group>
                 </group>
+                <group string="RFC y CURP del contacto">
+                    <group>
+                        <field name="vat" string="RFC" placeholder="Se actualiza en la ficha del contacto"/>
+                        <field
+                            name="curp"
+                            placeholder="Se actualiza en la ficha del contacto"
+                            invisible="rating_company_type != 'fisica'"
+                        />
+                    </group>
+                    <p class="text-muted" colspan="2">
+                        Estos datos se guardan en el contacto (no se duplican).
+                        RFC aplica a Moral y Física; CURP solo a persona física.
+                    </p>
+                </group>
                 <group string="Datos a capturar del contacto" invisible="not document_type_id">
                     <group>
                         <field name="show_vat" invisible="1"/>
@@ -60,11 +74,9 @@
                         <field name="show_infonavit_number" invisible="1"/>
                         <field name="show_contractual_object" invisible="1"/>
 
-                        <field name="vat" invisible="not show_vat" required="show_vat"/>
                         <field name="legal_representative" invisible="not show_legal_representative" required="show_legal_representative"/>
                         <field name="legal_representative_id" invisible="not show_legal_representative_id" required="show_legal_representative_id"/>
                         <field name="official_id" invisible="not show_official_id" required="show_official_id"/>
-                        <field name="curp" invisible="not show_curp" required="show_curp"/>
                         <field name="opening_date" invisible="not show_opening_date" required="show_opening_date"/>
                         <field name="social_capital" invisible="not show_social_capital"/>
                         <field name="bank_name" invisible="not show_bank_name" required="show_bank_name"/>

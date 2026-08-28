@@ -178,14 +178,20 @@ class PartnerDocumentUploadWizard(models.TransientModel):
                 'ptype': 'Moral' if person_type == 'moral' else 'Física',
             })
 
+        partner_vals = {}
+        if self.vat:
+            partner_vals['vat'] = self.vat
+        if self.curp:
+            partner_vals['curp'] = self.curp
         if doc_type:
-            partner_vals = {}
             for fname in doc_type.get_capture_field_list():
+                if fname in ('vat', 'curp'):
+                    continue
                 value = self[fname]
                 if value:
                     partner_vals[fname] = value
-            if partner_vals:
-                partner.write(partner_vals)
+        if partner_vals:
+            partner.write(partner_vals)
 
         document = self.env['partner.document'].create({
             'partner_id': partner.id,

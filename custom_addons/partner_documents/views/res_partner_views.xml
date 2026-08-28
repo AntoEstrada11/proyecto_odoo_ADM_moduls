@@ -127,7 +127,6 @@
                 <page string="Datos de proveedor" name="supplier_qualification">
                     <group>
                         <group string="Identificación común">
-                            <field name="vat" string="RFC"/>
                             <field name="rating_company_type" readonly="1"/>
                             <field name="bank_name"/>
                             <field name="bank_account"/>
@@ -138,7 +137,6 @@
                     <group string="Datos Persona Física" invisible="rating_company_type != 'fisica'">
                         <group>
                             <field name="official_id"/>
-                            <field name="curp"/>
                         </group>
                     </group>
 
